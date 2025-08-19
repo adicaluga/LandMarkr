@@ -12,3 +12,18 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+
+/*
+ * Start simple: one User table.
+ * - id: primary key
+ * - email: unique login identifier (we can add passwords or external auth later)
+ * - name: optional display name
+ * - createdAt: timestamp
+ */
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+}

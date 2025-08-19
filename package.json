@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "pnpm --parallel --filter server dev --filter client dev"
+  }
+}

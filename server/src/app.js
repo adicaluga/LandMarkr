@@ -1,3 +1,4 @@
+//Wire the backend route
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
@@ -20,12 +21,15 @@ app.use(express.json());
  * http://localhost:4000/api/search?lat=43.7&lon=-79.4&radius=5000
 
  */
+
+ //https://www.youtube.com/watch?v=SccSCuHhOw0&ab_channel=WebDevSimplified
 app.get("/api/search", async (req, res) => {
   const { lat, lon, radius = 5000 } = req.query;
   if (!lat || !lon)
     return res.status(400).json({ error: "lat & lon required" });
 
   try {
+    // Send a req to google places api
     const gRes = await axios.get(
       "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
       {
@@ -49,12 +53,43 @@ app.get("/api/search", async (req, res) => {
  * POST /api/users/:id/favourites
  * Body: { externalId, name, lat, lon }
  */
-app.post("/api/users/:id/favourites", async (req, res) => {
+
+ //??? whats this?
+// app.post("/api/users/:id/favourites", async (req, res) => {
+//   try {
+//     const fav = await prisma.favourite.create({
+//       // ...req bag of candy inside of bag of candy
+//       data: {
+//         userId: req.params.id,
+//         ...req.body,
+//         provider: "GOOGLE" },
+//     });
+
+//     //Send back to client as json
+//     res.json(fav);
+//   } catch (e) {
+//     res.status(500).json({ error: e.message });
+//   }
+// });
+
+// Create a user
+app.post("/api/users", async (req, res) => {
   try {
-    const fav = await prisma.favourite.create({
-      data: { userId: req.params.id, ...req.body, provider: "GOOGLE" },
+    const { email, name } = req.body;
+    const user = await prisma.user.create({
+      data: { email, name }
     });
-    res.json(fav);
+    res.status(201).json(user);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// List users
+app.get("/api/users", async (_req, res) => {
+  try {
+    const users = await prisma.user.findMany({ orderBy: { id: "asc" } });
+    res.json(users);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
