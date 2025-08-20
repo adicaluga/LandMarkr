@@ -85,7 +85,7 @@ app.post("/api/users", async (req, res) => {
   }
 });
 
-// List users
+// List the users
 app.get("/api/users", async (_req, res) => {
   try {
     const users = await prisma.user.findMany({ orderBy: { id: "asc" } });

@@ -1,4 +1,5 @@
 import {useEffect, useState } from "react";
+import "./SearchDemo.css";
 
 export default function SearchDemo() {
   // --user state--
@@ -18,33 +19,35 @@ export default function SearchDemo() {
   }, []);
 
   // Create a user via backend
-   async function createUser(e) {
-     e.preventDefault();
-     setUserMsg("");
-     if (!email.trim()) {
-       setUserMsg("Email is required.");
-       return;
-     }
-     try {
-       const res = await fetch("http://localhost:4000/api/users", {
-         method: "POST",
-         headers: { "Content-Type": "application/json" },
-         body: JSON.stringify({ email: email.trim(), name: name.trim() || undefined }),
-       });
-       if (!res.ok) {
-         const err = await res.json().catch(() => ({}));
-         throw new Error(err.error || `Request failed (${res.status})`);
-       }
-       const newUser = await res.json();
-       setUser(newUser);
-       localStorage.setItem("landmarkr:user", JSON.stringify(newUser));
-       setUserMsg(`Created user #${newUser.id}`);
-       setEmail("");
-       setName("");
-     } catch (err) {
-       setUserMsg(String(err.message || err));
-     }
-   }
+  async function createUser(e) {
+    e.preventDefault();
+    setUserMsg("");
+    if (!email.trim()) {
+      setUserMsg("Email is required.");
+      return;
+    }
+    try {
+      const res = await fetch("http://localhost:4000/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), name: name.trim() || undefined }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Request failed (${res.status})`);
+      }
+      const newUser = await res.json();
+      setUser(newUser);
+
+       // Use a localStorage  ??????
+      localStorage.setItem("landmarkr:user", JSON.stringify(newUser));
+      setUserMsg(`Created user #${newUser.id}`);
+      setEmail("");
+      setName("");
+    } catch (err) {
+      setUserMsg(String(err.message || err));
+    }
+  }
 
   // Fetch request to the backend
   async function find() {
@@ -69,54 +72,55 @@ export default function SearchDemo() {
 
   // Put into css file
   return (
-      <>
-        {/* --- Create User --- */}
-        <section style={{ marginBottom: 16, paddingBottom: 12, borderBottom: "1px solid #ddd" }}>
-          <h3>Create a User</h3>
-          <form onSubmit={createUser} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <input
-              type="email"
-              placeholder="email@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Display name (optional)"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <button type="submit">Create</button>
-            <span style={{ marginLeft: 8, color: userMsg?.startsWith("Created") ? "green" : "crimson" }}>
-              {userMsg}
-            </span>
-          </form>
-          <div style={{ marginTop: 6, fontSize: 12, color: "#555" }}>{userBadge}</div>
-        </section>
+    <>
+      {/* --- Create User --- */}
+      <section className="userSection">
+        <h3>Create a User</h3>
 
-        {/* --- Find Attractions --- */}
-        <section>
-          <button onClick={find} disabled={loading}>
-            {loading ? "Loading..." : "Find Attractions"}
-          </button>
-          <ul>
-            {results.map((p) => (
-              <li key={p.place_id}>
-                {p.name}
-                {/* Placeholder "Save" button for later — needs Favourite model */}
-                <button
-                  style={{ marginLeft: 8 }}
-                  disabled={!user} // require a user first
-                  title={!user ? "Create a user first" : "Save (coming soon)"}
-                  onClick={() => alert("Save to favourites coming soon")}
-                >
-                  ❤️ Save
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </>
-    );
-  }
+        <form onSubmit={createUser} className="form">
+          <input
+            type="email"
+            placeholder="email@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Display name (optional)"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <button type="submit">Create</button>
+          <span className={`userMsg ${userMsg.startsWith("Created") ? "success" : ""}`}>
+            {userMsg}
+          </span>
+        </form>
+
+        <div className="userBadge">{userBadge}</div>
+      </section>
+
+      {/* --- Find Attractions --- */}
+      <section className="attractionFinder">
+        <button onClick={find} disabled={loading} className="find">
+          {loading ? "Loading..." : "Find Attractions"}
+        </button>
+        <ul className="list">
+          {results.map((p) => (
+            <li key={p.place_id}>
+              {p.name}
+              <button
+                className="saveBtn"
+                disabled={!user}
+                title={!user ? "Create a user first" : "Save (coming soon)"}
+                onClick={() => alert("Save to favourites coming soon")}
+              >
+                ❤️ Save
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </>
+  );
+}
