@@ -1,0 +1,100 @@
+/* Backdrop */
+.cu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.42);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+}
+
+/* Modal */
+.cu-modal {
+  width: min(92vw, 420px);
+  background: #fff8dc;
+  border-radius: 16px;              /* rounded rectangle */
+  box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+  overflow: hidden;
+  outline: none;
+}
+
+/* Header */
+.cu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #06402B;             /* your brand green */
+  color: #fff8dc;
+  padding: 14px 16px;
+}
+.cu-header h3 {
+  margin-left: 1px;
+}
+
+.cu-close {
+  border: 0;
+  background: transparent;
+  color: #fff8dc;
+  font-size: 18px;
+  cursor: pointer;
+
+}
+
+/* Form */
+.cu-form {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+.cu-label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+}
+.cu-input {
+  padding: 10px 12px;
+  border: 1px solid #d7d7d7;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.cu-input:focus {
+  outline: 2px solid #cfe8df;
+  border-color: #9fd3c3;
+}
+
+.cu-msg {
+  color: #b00020;
+  font-size: 13px;
+}
+
+/* Actions */
+.cu-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+.cu-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.cu-btn-primary {
+  background: #06402B;
+  color: #fff;
+}
+.cu-btn-primary:hover {
+  filter: brightness(1.1);
+}
+.cu-btn-secondary {
+  background:  #06402B;
+}
+.cu-btn-secondary:hover {
+  filter: brightness(1.1);
+}
+
+/*.cu-label input {
+    background-color: #fff8dc;
+}*/
