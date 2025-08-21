@@ -1,14 +1,14 @@
 import {useEffect, useState } from "react";
 import CreateUserModal from "./components/CreateUserModal";
-import "./SearchDemo.css";
+import "./Home.css";
 
-export default function SearchDemo() {
+export default function Home() {
   // --user state--
   const [user, setUser] = useState(null);
   const [showCreateUser, setShowCreateUser] = useState(false);
 
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+  // const [results, setResults] = useState([]);
+  // const [loading, setLoading] = useState(false);
 
   // Load saved user from localStorage on first render
   useEffect(() => {
@@ -19,23 +19,23 @@ export default function SearchDemo() {
   // Create a user via backend
 
   // Fetch request to the backend
-  async function find() {
-    try {
-      const res = await fetch(
-        "http://localhost:4000/api/search?lat=43.6532&lon=-79.3832&radius=5000"
-      );
-      const data = await res.json();
-      setResults(data);
-      // waits for browser to finish reading and turning the response into a real JS object
+  // async function find() {
+  //   try {
+  //     const res = await fetch(
+  //       "http://localhost:4000/api/search?lat=43.6532&lon=-79.3832&radius=5000"
+  //     );
+  //     const data = await res.json();
+  //     setResults(data);
+  //     // waits for browser to finish reading and turning the response into a real JS object
 
-      // now setResults is called with actual attraction data, and React updates the page
-    } catch (e) {
-      console.error(e);
-      setResults([]);
-    } finally {
-      setLoading(false);
-    }
-  }
+  //     // now setResults is called with actual attraction data, and React updates the page
+  //   } catch (e) {
+  //     console.error(e);
+  //     setResults([]);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
 
   const userBadge = user ? `User #${user.id} — ${user.email}` : "No user yet";
 
