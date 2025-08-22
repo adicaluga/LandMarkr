@@ -1,6 +1,7 @@
 import {useEffect, useState } from "react";
 import CreateUserModal from "./components/CreateUserModal";
 import "./Home.css";
+import SearchBar from "./components/SearchBar";
 
 export default function Home() {
   // --user state--
@@ -18,7 +19,7 @@ export default function Home() {
 
   // Create a user via backend
 
-  // Fetch request to the backend
+ // Fetch request to the backend
   // async function find() {
   //   try {
   //     const res = await fetch(
@@ -88,6 +89,16 @@ export default function Home() {
         onClose={() => setShowCreateUser(false)}
         onCreated={(u) => setUser(u)}
       />
+
+      {/*Search Bar */}
+      {/* <SearchBar setResults={setResults}/>
+        <ul>
+          {results.map((p) => (
+            <li key={p.place_id}>{p.name}</li>
+          ))}
+        </ul>*/}
     </>
+
+
   );
 }
