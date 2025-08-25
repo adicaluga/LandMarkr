@@ -12,47 +12,7 @@ const prisma = new PrismaClient();
 app.use(cors());
 app.use(express.json());
 
-/**
- * GET /api/search?lat=43.7&lon=-79.4&radius=5000
- * Returns Google Places tourist attractions that are open now.
- *
- *
- *
- * http://localhost:4000/api/search?lat=43.7&lon=-79.4&radius=5000
-
- */
-
-//https://www.youtube.com/watch?v=SccSCuHhOw0&ab_channel=WebDevSimplified
-// app.get("/api/search", async (req, res) => {
-//   const { lat, lon, radius = 5000, query } = req.query;
-//   if (!lat || !lon)
-//     return res.status(400).json({ error: "lat & lon required" });
-
-//   try {
-//     // Send a req to google places api
-//     const gRes = await axios.get(
-//       "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
-//       {
-//         params: {
-//           key: process.env.GOOGLE_PLACES_KEY,
-//           location: `${lat},${lon}`,
-//           radius,
-//           ...(query ? { keyword: query } : {}),
-//           type: "tourist_attraction",
-//           opennow: true,
-//         },
-//       },
-//     );
-//     res.json(gRes.data.results);
-//   } catch (err) {
-//     console.error(err.response?.data || err.message);
-//     res.status(500).json({ error: "Google Places request failed" });
-//   }
-// });
-
-
-
-// Could bring back
+// Search bar
 app.get("/api/search", async (req, res) => {
   const { lat, lon, radius = 5000, query, city } = req.query;
 
@@ -61,6 +21,8 @@ app.get("/api/search", async (req, res) => {
 
     // If no coords but we got a city, geocode it
     if ((!Number.isFinite(latNum) || !Number.isFinite(lonNum)) && city) {
+
+      // Calling geocoding api
       const geo = await axios.get(
         "https://maps.googleapis.com/maps/api/geocode/json",
         {
@@ -104,6 +66,32 @@ app.get("/api/search", async (req, res) => {
   } catch (err) {
     console.error(err.response?.data || err.message);
     res.status(500).json({ error: "Search failed" });
+  }
+});
+
+// Proxy Google place photos so the key never hits the browser
+app.get("/api/photo", async (req, res) => {
+  const ref = req.query.ref;
+  const maxwidth = Number(req.query.w) || 400; // optional width param
+  if (!ref) return res.status(400).send("Missing photo ref");
+
+  try {
+    const gPhoto = await axios.get(
+      "https://maps.googleapis.com/maps/api/place/photo",
+      {
+        params: {
+          key: process.env.GOOGLE_PLACES_KEY,
+          photoreference: ref,
+          maxwidth,
+        },
+        responseType: "stream",
+      }
+    );
+    res.setHeader("Content-Type", gPhoto.headers["content-type"] || "image/jpeg");
+    gPhoto.data.pipe(res);
+  } catch (err) {
+    console.error("Photo proxy error:", err.response?.data || err.message);
+    res.status(500).send("Photo fetch failed");
   }
 });
 

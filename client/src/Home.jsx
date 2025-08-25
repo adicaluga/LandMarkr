@@ -2,6 +2,7 @@ import {useEffect, useState } from "react";
 import CreateUserModal from "./components/CreateUserModal";
 import "./Home.css";
 import SearchBar from "./components/SearchBar";
+import PlaceCard from "./components/PlaceCard";
 
 export default function Home() {
   // --user state--
@@ -92,11 +93,16 @@ export default function Home() {
 
       {/*Search Bar */}
       <SearchBar setResults={setResults}/>
-        <ul>
-          {results.map((p) => (
-            <li key={p.place_id}>{p.name}</li>
-          ))}
-        </ul>
+      <div className="resultsWrap">
+        {results.map((p) => (
+          <PlaceCard
+            key={p.place_id}
+            place={p}
+            canSave={!!user}
+            onSave={() => alert("Save coming soon")}
+          />
+        ))}
+      </div>
     </>
 
 
