@@ -22,30 +22,88 @@ app.use(express.json());
 
  */
 
- //https://www.youtube.com/watch?v=SccSCuHhOw0&ab_channel=WebDevSimplified
+//https://www.youtube.com/watch?v=SccSCuHhOw0&ab_channel=WebDevSimplified
+// app.get("/api/search", async (req, res) => {
+//   const { lat, lon, radius = 5000, query } = req.query;
+//   if (!lat || !lon)
+//     return res.status(400).json({ error: "lat & lon required" });
+
+//   try {
+//     // Send a req to google places api
+//     const gRes = await axios.get(
+//       "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
+//       {
+//         params: {
+//           key: process.env.GOOGLE_PLACES_KEY,
+//           location: `${lat},${lon}`,
+//           radius,
+//           ...(query ? { keyword: query } : {}),
+//           type: "tourist_attraction",
+//           opennow: true,
+//         },
+//       },
+//     );
+//     res.json(gRes.data.results);
+//   } catch (err) {
+//     console.error(err.response?.data || err.message);
+//     res.status(500).json({ error: "Google Places request failed" });
+//   }
+// });
+
+
+
+// Could bring back
 app.get("/api/search", async (req, res) => {
-  const { lat, lon, radius = 5000 } = req.query;
-  if (!lat || !lon)
-    return res.status(400).json({ error: "lat & lon required" });
+  const { lat, lon, radius = 5000, query, city } = req.query;
 
   try {
-    // Send a req to google places api
+    let latNum = Number(lat), lonNum = Number(lon);
+
+    // If no coords but we got a city, geocode it
+    if ((!Number.isFinite(latNum) || !Number.isFinite(lonNum)) && city) {
+      const geo = await axios.get(
+        "https://maps.googleapis.com/maps/api/geocode/json",
+        {
+          params: {
+            key: process.env.GOOGLE_PLACES_KEY,
+            address: city
+          }
+        }
+      );
+
+      if (geo.data.status !== "OK" || !geo.data.results?.[0]) {
+        return res.status(404).json({ error: `Could not geocode city: ${city}` });
+      }
+
+      const loc = geo.data.results[0].geometry.location; // { lat, lng }
+      latNum = loc.lat;
+      lonNum = loc.lng;
+    }
+
+    // Still no coords? fail
+    if (!Number.isFinite(latNum) || !Number.isFinite(lonNum)) {
+      return res.status(400).json({ error: "Provide lat & lon or a city name" });
+    }
+
+    // Finally call Places Nearby
     const gRes = await axios.get(
       "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
       {
         params: {
           key: process.env.GOOGLE_PLACES_KEY,
-          location: `${lat},${lon}`,
+          location: `${latNum},${lonNum}`,
           radius,
+          ...(query ? { keyword: query } : {}),
           type: "tourist_attraction",
           opennow: true,
         },
-      },
+      }
     );
-    res.json(gRes.data.results);
+
+    res.json(gRes.data.results || []);
   } catch (err) {
     console.error(err.response?.data || err.message);
-    res.status(500).json({ error: "Google Places request failed" });
+    res.status(500).json({ error: "Search failed" });
   }
 });
 
@@ -54,7 +112,6 @@ app.get("/api/search", async (req, res) => {
  * Body: { externalId, name, lat, lon }
  */
 
- //??? whats this?
 // app.post("/api/users/:id/favourites", async (req, res) => {
 //   try {
 //     const fav = await prisma.favourite.create({

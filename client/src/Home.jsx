@@ -8,7 +8,7 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [showCreateUser, setShowCreateUser] = useState(false);
 
-  // const [results, setResults] = useState([]);
+  const [results, setResults] = useState([]);
   // const [loading, setLoading] = useState(false);
 
   // Load saved user from localStorage on first render
@@ -91,12 +91,12 @@ export default function Home() {
       />
 
       {/*Search Bar */}
-      {/* <SearchBar setResults={setResults}/>
+      <SearchBar setResults={setResults}/>
         <ul>
           {results.map((p) => (
             <li key={p.place_id}>{p.name}</li>
           ))}
-        </ul>*/}
+        </ul>
     </>
 
 
