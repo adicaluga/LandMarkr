@@ -140,4 +140,81 @@ app.get("/api/users", async (_req, res) => {
   }
 });
 
+
+
+ // FAVOURITES
+ app.get("/api/users/:id/favourites", async (req, res) => {
+   const userId = Number(req.params.id);
+   if (!Number.isInteger(userId) || userId <= 0) {
+     return res.status(400).json({ error: "Invalid user id" });
+   }
+
+   try {
+     const favs = await prisma.favourite.findMany({
+       where: { userId },
+       orderBy: { createdAt: "desc" },
+     });
+     res.json(favs);
+   } catch (e) {
+     console.error(e);
+     res.status(500).json({ error: "Failed to load favourites" });
+   }
+ });
+
+
+ app.post("/api/users/:id/favourites", async (req, res) => {
+   const userId = Number(req.params.id);
+   if (!Number.isInteger(userId) || userId <= 0) {
+     return res.status(400).json({ error: "Invalid user id" });
+   }
+
+   const {
+     provider = "GOOGLE",
+     placeId,
+     name,
+     address = null,
+     photoRef = null,
+     rating = null,
+   } = req.body || {};
+
+   if (!placeId || !name) {
+     return res.status(400).json({ error: "placeId and name are required" });
+   }
+
+   try {
+     // idempotent save
+     const fav = await prisma.favourite.upsert({
+       where: { userId_provider_placeId: { userId, provider, placeId } },
+       update: {},
+       create: { userId, provider, placeId, name, address, photoRef, rating },
+     });
+     res.status(201).json(fav);
+   } catch (e) {
+     console.error(e);
+     res.status(500).json({ error: "Failed to save favourite" });
+   }
+ });
+
+ // DELETE /api/users/:id/favourites/:provider/:placeId
+ app.delete("/api/users/:id/favourites/:provider/:placeId", async (req, res) => {
+   const userId = Number(req.params.id);
+   if (!Number.isInteger(userId) || userId <= 0) {
+     return res.status(400).json({ error: "Invalid user id" });
+   }
+   const { provider, placeId } = req.params;
+
+   try {
+     const fav = await prisma.favourite.findUnique({
+       where: { userId_provider_placeId: { userId, provider, placeId } },
+     });
+     if (!fav) return res.status(404).json({ error: "Favourite not found" });
+
+     await prisma.favourite.delete({ where: { id: fav.id } });
+     res.json({ ok: true });
+   } catch (e) {
+     console.error(e);
+     res.status(500).json({ error: "Failed to delete favourite" });
+   }
+ });
+
 app.listen(4000, () => console.log("API ready on http://localhost:4000"));

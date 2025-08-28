@@ -1,5 +1,6 @@
 import "./PlaceCard.css";
 
+// Need to make filters
 export default function PlaceCard({ place, onSave, canSave }) {
   const photoRef = place.photos?.[0]?.photo_reference;
   const imgSrc = photoRef
@@ -12,6 +13,7 @@ export default function PlaceCard({ place, onSave, canSave }) {
 
   return (
     <article className="pc-card">
+      {/*Thumbnail*/}
       <div className="pc-thumb">
         {imgSrc ? (
           <img src={imgSrc} alt={place.name} loading="lazy" />
@@ -20,6 +22,7 @@ export default function PlaceCard({ place, onSave, canSave }) {
         )}
       </div>
 
+      {/*Body of card*/}
       <div className="pc-body">
         <h4 className="pc-title">{place.name}</h4>
         <div className="pc-meta">
@@ -33,12 +36,11 @@ export default function PlaceCard({ place, onSave, canSave }) {
         </div>
         {place.vicinity && <div className="pc-addr">{place.vicinity}</div>}
 
+        {/*Actions at the bottom of the card*/}
         <div className="pc-actions">
           <a
             className="pc-link"
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              place.name
-            )}&query_place_id=${encodeURIComponent(place.place_id)}`}
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}&query_place_id=${encodeURIComponent(place.place_id)}`}
             target="_blank"
             rel="noreferrer"
           >

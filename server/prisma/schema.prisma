@@ -13,17 +13,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Provider {
+  GOOGLE
+}
 
-/*
- * Start simple: one User table.
- * - id: primary key
- * - email: unique login identifier (we can add passwords or external auth later)
- * - name: optional display name
- * - createdAt: timestamp
- */
+model Favourite {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  provider  Provider  @default(GOOGLE)
+  placeId   String
+  name      String
+  address   String?
+  photoRef  String?
+  rating    Float?
+  createdAt DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider, placeId])
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   name      String?
   createdAt DateTime @default(now())
+  favorites Favourite[]
 }
