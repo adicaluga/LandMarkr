@@ -15,11 +15,7 @@ export default function PlaceCard({ place, onSave, canSave }) {
     <article className="pc-card">
       {/*Thumbnail*/}
       <div className="pc-thumb">
-        {imgSrc ? (
-          <img src={imgSrc} alt={place.name} loading="lazy" />
-        ) : (
-          <div className="pc-placeholder">No photo</div>
-        )}
+        {imgSrc ? (<img src={imgSrc} alt={place.name} loading="lazy" />) : (<div className="pc-placeholder">No photo</div>)}
       </div>
 
       {/*Body of card*/}
@@ -48,7 +44,7 @@ export default function PlaceCard({ place, onSave, canSave }) {
           </a>
           <button
             className="pc-save"
-            disabled={!canSave}
+            enabled={!canSave}
             title={!canSave ? "Create a user first" : "Save to favourites"}
             onClick={() => onSave?.(place)}
           >

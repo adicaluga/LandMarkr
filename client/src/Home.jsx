@@ -76,7 +76,7 @@ export default function Home() {
                   title={!user ? "Create a user first" : "Save (coming soon)"}
                   onClick={() => alert("Save to favourites coming soon")}
                 >
-                  ❤️ Save
+                Save
                 </button>
               </li>
             ))}

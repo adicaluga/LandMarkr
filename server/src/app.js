@@ -3,8 +3,8 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import axios from "axios";
-import pkg from "@prisma/client"; // 👈 default-import the whole module
-const { PrismaClient } = pkg; //    then pull out PrismaClient
+import pkg from "@prisma/client";
+const { PrismaClient } = pkg;
 
 const app = express();
 const prisma = new PrismaClient();
@@ -142,13 +142,14 @@ app.get("/api/users", async (_req, res) => {
 
 
 
- // FAVOURITES
+// LIST FAVOURITES
 app.get("/api/users/:id/favourites", async (req, res) => {
   const userId = Number(req.params.id);
   if (!Number.isInteger(userId) || userId <= 0) {
     return res.status(400).json({ error: "Invalid user id" });
   }
 
+  // Send query to favourites table
   try {
     const favs = await prisma.favourite.findMany({
       where: { userId },
@@ -162,12 +163,16 @@ app.get("/api/users/:id/favourites", async (req, res) => {
 });
 
 
+// SAVE FAVOURITES
 app.post("/api/users/:id/favourites", async (req, res) => {
   const userId = Number(req.params.id);
+
+  // Checking for valid user
   if (!Number.isInteger(userId) || userId <= 0) {
     return res.status(400).json({ error: "Invalid user id" });
   }
 
+  // Read json body sent by the client
   const {
     provider = "GOOGLE",
     placeId,
@@ -181,9 +186,11 @@ app.post("/api/users/:id/favourites", async (req, res) => {
     return res.status(400).json({ error: "placeId and name are required" });
   }
 
+
   try {
     // idempotent save
     const fav = await prisma.favourite.upsert({
+      // Unique key
       where: { userId_provider_placeId: { userId, provider, placeId } },
       update: {},
       create: { userId, provider, placeId, name, address, photoRef, rating },
@@ -195,26 +202,26 @@ app.post("/api/users/:id/favourites", async (req, res) => {
   }
 });
 
-// DELETE /api/users/:id/favourites/:provider/:placeId
-app.delete("/api/users/:id/favourites/:provider/:placeId", async (req, res) => {
-  const userId = Number(req.params.id);
-  if (!Number.isInteger(userId) || userId <= 0) {
-    return res.status(400).json({ error: "Invalid user id" });
-  }
-  const { provider, placeId } = req.params;
+// DELETE /api/users/:id/favourites/:provider/:placeId FAVORITES
+// app.delete("/api/users/:id/favourites/:provider/:placeId", async (req, res) => {
+//   const userId = Number(req.params.id);
+//   if (!Number.isInteger(userId) || userId <= 0) {
+//     return res.status(400).json({ error: "Invalid user id" });
+//   }
+//   const { provider, placeId } = req.params;
 
-  try {
-    const fav = await prisma.favourite.findUnique({
-      where: { userId_provider_placeId: { userId, provider, placeId } },
-    });
-    if (!fav) return res.status(404).json({ error: "Favourite not found" });
+//   try {
+//     const fav = await prisma.favourite.findUnique({
+//       where: { userId_provider_placeId: { userId, provider, placeId } },
+//     });
+//     if (!fav) return res.status(404).json({ error: "Favourite not found" });
 
-    await prisma.favourite.delete({ where: { id: fav.id } });
-    res.json({ ok: true });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Failed to delete favourite" });
-  }
-});
+//     await prisma.favourite.delete({ where: { id: fav.id } });
+//     res.json({ ok: true });
+//   } catch (e) {
+//     console.error(e);
+//     res.status(500).json({ error: "Failed to delete favourite" });
+//   }
+// });
 
 app.listen(4000, () => console.log("API ready on http://localhost:4000"));
