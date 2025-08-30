@@ -1,7 +1,7 @@
 import "./PlaceCard.css";
 
 // Need to make filters
-export default function PlaceCard({ place, onSave, canSave }) {
+export default function PlaceCard({ place, saved, canSave, onToggleFav }) {
   const photoRef = place.photos?.[0]?.photo_reference;
   const imgSrc = photoRef
     ? `http://localhost:4000/api/photo?ref=${encodeURIComponent(photoRef)}&w=480`
@@ -45,8 +45,8 @@ export default function PlaceCard({ place, onSave, canSave }) {
           <button
             className="pc-save"
             enabled={!canSave}
-            title={!canSave ? "Create a user first" : "Save to favourites"}
-            onClick={() => onSave?.(place)}
+            title={!canSave ? "Create a user first" : saved ? "Remove from favourites" : "Save to favourites"}
+            onClick={() => onToggleFav?.(place)}
           >
             Add to favourites
           </button>

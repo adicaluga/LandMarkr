@@ -1,15 +1,16 @@
-import {useEffect, useState } from "react";
+import {useEffect, useState, useMemo } from "react";
 import CreateUserModal from "./components/CreateUserModal";
 import "./Home.css";
 import SearchBar from "./components/SearchBar";
 import PlaceCard from "./components/PlaceCard";
+import { listFavourites, saveFavourite, deleteFavourite } from "./Favourites.js";
 
 export default function Home() {
   // --user state--
   const [user, setUser] = useState(null);
   const [showCreateUser, setShowCreateUser] = useState(false);
-
   const [results, setResults] = useState([]);
+  const [favs, setFavs] = useState([]);
   // const [loading, setLoading] = useState(false);
 
   // Load saved user from localStorage on first render
@@ -18,26 +19,46 @@ export default function Home() {
     if (saved) setUser(JSON.parse(saved));
   }, []);
 
-  // Create a user via backend
+  const favKey = useMemo(
+    () => new Set(favs.map(f => `${f.provider}:${f.placeId}`)),
+    [favs]
+  );
 
- // Fetch request to the backend
-  // async function find() {
-  //   try {
-  //     const res = await fetch(
-  //       "http://localhost:4000/api/search?lat=43.6532&lon=-79.3832&radius=5000"
-  //     );
-  //     const data = await res.json();
-  //     setResults(data);
-  //     // waits for browser to finish reading and turning the response into a real JS object
+  useEffect(() => {
+    if (!user?.id) return;
+    listFavourites(user.id).then(setFavs).catch(console.error);
+  }, [user?.id]);
 
-  //     // now setResults is called with actual attraction data, and React updates the page
-  //   } catch (e) {
-  //     console.error(e);
-  //     setResults([]);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }
+
+  async function handleToggleFav(place) {
+    if (!user?.id) {
+      alert("Please create a user first.");
+      return;
+    }
+    const key = `GOOGLE:${place.place_id}`;
+    const isSaved = favKey.has(key);
+
+    try {
+      if (!isSaved) {
+        const created = await saveFavourite(user.id, {
+          provider: "GOOGLE",
+          placeId: place.place_id,
+          name: place.name,
+          address: place.formatted_address || place.vicinity || "",
+          photoRef: place.photos?.[0]?.photo_reference || null,
+          rating: typeof place.rating === "number" ? place.rating : null,
+        });
+        setFavs(prev => [created, ...prev]); // optimistic add
+      } else {
+        await deleteFavourite(user.id, "GOOGLE", place.place_id);
+        setFavs(prev => prev.filter(f => !(f.provider === "GOOGLE" && f.placeId === place.place_id)));
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to update favourite.");
+    }
+  }
+
 
   const userBadge = user ? `User #${user.id} — ${user.email}` : "No user yet";
 
@@ -99,7 +120,8 @@ export default function Home() {
             key={p.place_id}
             place={p}
             canSave={!!user}
-            onSave={() => alert("Save coming soon")}
+            saved={favKey.has(`GOOGLE:${p.place_id}`)}
+            onToggleFav={() => handleToggleFav(p)}
           />
         ))}
       </div>
