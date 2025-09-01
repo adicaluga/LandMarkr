@@ -11,7 +11,11 @@ export default function Home() {
   const [showCreateUser, setShowCreateUser] = useState(false);
   const [results, setResults] = useState([]);
   const [favs, setFavs] = useState([]);
-  // const [loading, setLoading] = useState(false);
+
+  // NEW: view + favourites loading/error
+  const [view, setView] = useState("results"); // "results" | "favourites"
+  const [favLoading, setFavLoading] = useState(false);
+  const [favError,   setFavError]   = useState(null);
 
   // Load saved user from localStorage on first render
   useEffect(() => {
@@ -28,7 +32,6 @@ export default function Home() {
     if (!user?.id) return;
     listFavourites(user.id).then(setFavs).catch(console.error);
   }, [user?.id]);
-
 
   async function handleToggleFav(place) {
     if (!user?.id) {
@@ -59,51 +62,124 @@ export default function Home() {
     }
   }
 
+  // NEW: show favourites handler
+  async function handleShowFavourites() {
+    if (!user?.id) {
+      alert("Please create a user first.");
+      return;
+    }
+    try {
+      setFavError(null);
+      setFavLoading(true);
+      const latest = await listFavourites(user.id);
+      setFavs(latest);
+      setView("favourites");
+    } catch (e) {
+      console.error(e);
+      setFavError("Failed to load favourites.");
+    } finally {
+      setFavLoading(false);
+    }
+  }
+
+  // helper to reuse PlaceCard for favourites
+  function favToPlace(f) {
+    return {
+      place_id: f.placeId,
+      name: f.name,
+      formatted_address: f.address || "",
+      rating: typeof f.rating === "number" ? f.rating : undefined,
+      photos: f.photoRef ? [{ photo_reference: f.photoRef }] : undefined,
+    };
+  }
 
   const userBadge = user ? `User #${user.id} — ${user.email}` : "No user yet";
 
-  // Put into css file
   return (
     <>
       {/* --- Create User --- */}
       <section className="userSection">
-        <h3>LandMarkr</h3>
+        <h3 className="title">LandMarkr</h3>
         <div className="userBadge">{userBadge}</div>
         <div className="createButton">
-          {/* Small inline style here for layout only; move to CSS if you prefer */}
           <button onClick={() => setShowCreateUser(true)}>
             {user ? "Create Another User" : "Create User"}
           </button>
           {user && (
-            <button onClick={() => {localStorage.removeItem("landmarkr:user"); setUser(null);}}>
+            <button
+              onClick={() => {
+                localStorage.removeItem("landmarkr:user");
+                setUser(null);
+                setFavs([]);
+                setView("results");
+              }}
+              className="signOut"
+            >
               Sign Out
             </button>
           )}
         </div>
       </section>
 
-      {/* Find Attractions
-        <section>
-          <button onClick={find} disabled={loading}>
-            {loading ? "Loading..." : "Find Attractions"}
-          </button>
-          <ul className="list">
-            {results.map((p) => (
-              <li key={p.place_id}>
-                {p.name}
-                <button
-                  className="saveBtn"
-                  disabled={!user}
-                  title={!user ? "Create a user first" : "Save (coming soon)"}
-                  onClick={() => alert("Save to favourites coming soon")}
-                >
-                Save
-                </button>
-              </li>
-            ))}
-          </ul>
+      {/* Search Bar */}
+      <SearchBar setResults={setResults}/>
+
+      {/* NEW: toolbar */}
+      <div className="toolbar" style={{ display: "flex", gap: 8, margin: "12px 0" }}>
+        <button
+          onClick={() => setView("results")}
+          disabled={view === "results"}
+          title="Show search results"
+        >
+          Results
+        </button>
+
+        <button
+          onClick={handleShowFavourites}
+          disabled={!user || view === "favourites"}
+          title={!user ? "Create a user first" : "Show your favourites"}
+        >
+          ❤️ Favourites
+        </button>
+      </div>
+
+      {/* Results view */}
+      {view === "results" && (
+        <div className="resultsWrap">
+          {results.map((p) => (
+            <PlaceCard
+              key={p.place_id}
+              place={p}
+              canSave={!!user}
+              saved={favKey.has(`GOOGLE:${p.place_id}`)}
+              onToggleFav={() => handleToggleFav(p)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Favourites view */}
+      {view === "favourites" && (
+        <section className="resultsWrap">
+          {favLoading && <div>Loading favourites…</div>}
+          {favError && <div className="error">{favError}</div>}
+          {!favLoading && !favError && favs.length === 0 && (
+            <div>No favourites yet. Click 🤍 on a place to save it.</div>
+          )}
+          {!favLoading && !favError && favs.map((f) => {
+            const place = favToPlace(f);
+            return (
+              <PlaceCard
+                key={`${f.provider}:${f.placeId}`}
+                place={place}
+                canSave={!!user}
+                saved={true}
+                onToggleFav={() => handleToggleFav(place)}
+              />
+            );
+          })}
         </section>
-      */}
+      )}
 
       {/* Modal */}
       <CreateUserModal
@@ -111,22 +187,6 @@ export default function Home() {
         onClose={() => setShowCreateUser(false)}
         onCreated={(u) => setUser(u)}
       />
-
-      {/*Search Bar */}
-      <SearchBar setResults={setResults}/>
-      <div className="resultsWrap">
-        {results.map((p) => (
-          <PlaceCard
-            key={p.place_id}
-            place={p}
-            canSave={!!user}
-            saved={favKey.has(`GOOGLE:${p.place_id}`)}
-            onToggleFav={() => handleToggleFav(p)}
-          />
-        ))}
-      </div>
     </>
-
-
   );
 }
