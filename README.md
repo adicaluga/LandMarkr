@@ -124,9 +124,9 @@ Through this project, I’ve gained hands-on experience with:
 │   └── .env
 │
 └── README.md
+```
 
 ---
-
 
 ## 🔑 Environment Setup
 
