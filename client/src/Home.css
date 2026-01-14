@@ -1,9 +1,9 @@
-/* client/src/SearchDemo.css */
-
 .userSection {
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #ddd;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: grid;
+  gap: 6px;
 }
 
 .form {
@@ -21,20 +21,11 @@
   cursor: pointer;
 }
 
-.userMsg {
-  margin-left: 8px;
-  font-size: 0.9rem;
-  color: crimson;
-}
-
-.userMsg.success {
-  color: green;
-}
-
 .userBadge {
   margin-top: 6px;
   font-size: 12px;
-  color: #555;
+  color: var(--muted);
+  letter-spacing: 0.4px;
 }
 
 ul {
@@ -59,36 +50,48 @@ ul li button {
   margin-top: 10px;
 }
 
-.userSection h3{
-  font-size: 4.0rem;
-  font-weight: bold;
-  color: #06402B
-}
-
-/*Irrelevant*/
-.userSection input{
-  background-color: #f0ead6;
-  color: black;
+.title {
+  margin: 0;
+  font-size: clamp(2.4rem, 4.2vw, 4.2rem);
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: var(--text);
+  text-shadow: 0 8px 28px rgba(176, 38, 255, 0.35);
 }
 
 .createButton {
-  position: fixed;   /* stays in place even if you scroll */
-  top: 20px;         /* distance from the top of the viewport */
-  right: 20px;       /* distance from the right edge */
+  position: fixed;
+  top: 20px;
+  right: 20px;
   padding: 8px 14px;
-
+  display: flex;
+  gap: 10px;
+  z-index: 10;
 }
 
 .signOut {
   margin-left: 8px;
   cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: none;
 }
 
 .resultsWrap {
-  margin-top: 12px;
+  margin-top: 16px;
   display: grid;
-  gap: 12px;
-  max-height: 65vh;      /* scrollable area height */
-  overflow-y: auto;      /* make it scroll */
-  padding-right: 6px;    /* room for scrollbar */
+  gap: 14px;
+  max-height: 65vh;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.toolbar {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 14px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
 }

@@ -1,5 +1,5 @@
 .sb-wrap {
-  margin: 16px 0;
+  margin: 20px 0 12px;
 }
 
 .sb-form {
@@ -12,30 +12,42 @@
 .sb-input {
   flex: 1 1 260px;
   min-width: 220px;
-  padding: 10px 12px;
-  border: 1px solid #d7d7d7;
-  border-radius: 10px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
   font-size: 14px;
+  background: rgba(10, 6, 20, 0.8);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px rgba(176, 38, 255, 0.06);
+}
+.sb-input::placeholder {
+  color: rgba(201, 184, 232, 0.75);
+}
+.sb-input:focus {
+  outline: 2px solid rgba(176, 38, 255, 0.35);
+  border-color: rgba(176, 38, 255, 0.55);
 }
 
 .sb-btn {
-  padding: 10px 14px;
+  padding: 10px 16px;
   border: 0;
-  border-radius: 10px;
-  background: #06402B;
-  color: #fff;
+  border-radius: 999px;
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  color: #100a1c;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
 }
 .sb-btn:hover { filter: brightness(1.08); }
 
 .sb-btn.secondary {
-  background: #06402B;
-  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: none;
 }
 
 .sb-msg {
   margin-top: 8px;
-  color: #b00020;
+  color: var(--danger);
   font-size: 13px;
 }

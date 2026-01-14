@@ -25,6 +25,7 @@ export default function SearchBar({ setResults }) {
     } finally {
       setLoading(false);
     }
+// ADD THE REST HERE
   }
 
   // Submit with city name (server will geocode)

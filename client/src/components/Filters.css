@@ -1,0 +1,27 @@
+.filters {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  color: var(--muted);
+}
+
+.filters label {
+  font-size: 13px;
+  letter-spacing: 0.3px;
+}
+
+.filters select,
+.filters input[type="checkbox"] {
+  accent-color: var(--accent-2);
+}
+
+.filters select {
+  background: rgba(10, 6, 20, 0.9);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  padding: 6px 10px;
+}

@@ -5,6 +5,6 @@
     "server"
   ],
   "scripts": {
-    "dev": "pnpm --parallel --filter server dev --filter client dev"
+    "dev": "pnpm --parallel --filter server --filter client dev"
   }
 }

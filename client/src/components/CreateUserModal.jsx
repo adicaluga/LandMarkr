@@ -3,7 +3,8 @@ import "./CreateUserModal.css";
 
 export default function CreateUserModal({ open, onClose, onCreated }) {
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [msg, setMsg] = useState("");
   const dialogRef = useRef(null);
 
@@ -27,20 +28,31 @@ export default function CreateUserModal({ open, onClose, onCreated }) {
     e.preventDefault();
     setMsg("");
     const trimmedEmail = email.trim();
-    const trimmedName = name.trim();
+    const trimmedPassword = password.trim();
+    const trimmedConfirm = confirmPassword.trim();
 
+    // Validations
     if (!trimmedEmail) {
       setMsg("Email is required.");
       return;
     }
+    if (!trimmedPassword) {
+      setMsg("Password is required.");
+      return;
+    }
+    if (trimmedPassword !== trimmedConfirm) {
+      setMsg("Passwords do not match.");
+      return;
+    }
 
     try {
-      const res = await fetch("http://localhost:4000/api/users", {
+      const res = await fetch("http://localhost:4000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           email: trimmedEmail,
-          name: trimmedName || undefined,
+          password: trimmedPassword,
         }),
       });
       const body = await res.json().catch(() => ({}));
@@ -52,7 +64,8 @@ export default function CreateUserModal({ open, onClose, onCreated }) {
       onCreated?.(body);
       // Reset form & close
       setEmail("");
-      setName("");
+      setPassword("");
+      setConfirmPassword("");
       onClose();
     } catch (err) {
       setMsg(String(err.message || err));
@@ -90,13 +103,26 @@ export default function CreateUserModal({ open, onClose, onCreated }) {
           </label>
 
           <label className="cu-label">
-            Display name (optional)
+            Password
             <input
-              type="text"
+              type="password"
               className="cu-input"
-              placeholder="Your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              placeholder="At least 8 characters"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </label>
+
+          <label className="cu-label">
+            Confirm password
+            <input
+              type="password"
+              className="cu-input"
+              placeholder="Re-enter password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
             />
           </label>
 

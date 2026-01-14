@@ -1,4 +1,3 @@
-// client/src/favouritesApi.js
 const API_BASE = "http://localhost:4000";
 
 export async function listFavourites(userId) {

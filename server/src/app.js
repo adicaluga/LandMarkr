@@ -4,70 +4,82 @@ import cors from "cors";
 import "dotenv/config";
 import axios from "axios";
 import pkg from "@prisma/client";
+import bcrypt from "bcryptjs";
 const { PrismaClient } = pkg;
 
 const app = express();
 const prisma = new PrismaClient();
 
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+}));
+
 app.use(express.json());
 
 // Search bar
 app.get("/api/search", async (req, res) => {
-  const { lat, lon, radius = 5000, query, city } = req.query;
+  const { lat, lon, radius, query, city, openNow, minRating } = req.query;
 
   try {
     let latNum = Number(lat), lonNum = Number(lon);
 
-    // If no coords but we got a city, geocode it
+    // geocode if city was provided and lat/lon absent (your existing logic)
     if ((!Number.isFinite(latNum) || !Number.isFinite(lonNum)) && city) {
-
-      // Calling geocoding api
       const geo = await axios.get(
         "https://maps.googleapis.com/maps/api/geocode/json",
-        {
-          params: {
-            key: process.env.GOOGLE_PLACES_KEY,
-            address: city
-          }
-        }
+        { params: { key: process.env.GOOGLE_PLACES_KEY, address: city } }
       );
-
       if (geo.data.status !== "OK" || !geo.data.results?.[0]) {
         return res.status(404).json({ error: `Could not geocode city: ${city}` });
       }
-
-      const loc = geo.data.results[0].geometry.location; // { lat, lng }
+      const loc = geo.data.results[0].geometry.location;
       latNum = loc.lat;
       lonNum = loc.lng;
     }
 
-    // Still no coords? fail
     if (!Number.isFinite(latNum) || !Number.isFinite(lonNum)) {
       return res.status(400).json({ error: "Provide lat & lon or a city name" });
     }
 
-    // Finally call Places Nearby
+    // Parse filters
+    const radiusNum   = Number(radius) || 5000;
+    const openNowBool = typeof openNow === "string"
+      ? openNow.toLowerCase() === "true"
+      : true; // default same as before
+    const minRatingNum = Number(minRating) || 0;
+
+    // Google Nearby Search: can pass openNow, keyword(query), radius, type
     const gRes = await axios.get(
       "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
       {
         params: {
           key: process.env.GOOGLE_PLACES_KEY,
           location: `${latNum},${lonNum}`,
-          radius,
-          ...(query ? { keyword: query } : {}),
+          radius: radiusNum,
           type: "tourist_attraction",
-          opennow: true,
+          ...(query ? { keyword: query } : {}),
+          ...(openNowBool ? { opennow: true } : {}), // only include if true
         },
       }
     );
 
-    res.json(gRes.data.results || []);
+    let results = gRes.data.results || [];
+
+    // Post-filter by rating (Google Nearby doesn't support rating filter)
+    if (minRatingNum > 0) {
+      results = results.filter(
+        (p) => typeof p.rating === "number" && p.rating >= minRatingNum
+      );
+    }
+
+    res.json(results);
   } catch (err) {
     console.error(err.response?.data || err.message);
     res.status(500).json({ error: "Search failed" });
   }
 });
+
 
 // Proxy Google place photos so the key never hits the browser
 app.get("/api/photo", async (req, res) => {
@@ -140,6 +152,39 @@ app.get("/api/users", async (_req, res) => {
   }
 });
 
+// Making session cookies
+
+app.post ("/api/auth/register", async (req,res) => {
+  try {
+    const { email, password, name} = req.body || {};
+
+    // Validation
+    if (!email || !password){
+      return res.status(400).json({ error: "Email and password are required." });
+    }
+
+    if (password.length < 8){
+      return res.status(400).json({ error: "Password must be at least 8 characters." });
+    }
+
+    // Hash the password
+    const passwordHash = await bcrypt.hash(password,12);
+
+    // Create prisma object
+    const user = await prisma.user.create({
+      data: { email, name: name || null, passwordHash },
+      select: { id: true, email: true, name: true, createdAt: true },
+    });
+
+    res.status(201).json(user);
+
+  } catch(e) {
+      res.status(400).json({ error: e.message });
+  }
+
+
+
+});
 
 
 // LIST FAVOURITES

@@ -4,6 +4,7 @@ import "./Home.css";
 import SearchBar from "./components/SearchBar";
 import PlaceCard from "./components/PlaceCard";
 import { listFavourites, saveFavourite, deleteFavourite } from "./Favourites.js";
+import Filters from "./components/Filters";
 
 export default function Home() {
   // --user state--
@@ -16,6 +17,13 @@ export default function Home() {
   const [view, setView] = useState("results"); // "results" | "favourites"
   const [favLoading, setFavLoading] = useState(false);
   const [favError,   setFavError]   = useState(null);
+
+  const [filters, setFilters] = useState({
+    openNow: true,   // default matches your current server behavior
+    minRating: 0,    // 0 = any
+    radius: 5000,    // meters
+  });
+
 
   // Load saved user from localStorage on first render
   useEffect(() => {
@@ -122,7 +130,8 @@ export default function Home() {
       </section>
 
       {/* Search Bar */}
-      <SearchBar setResults={setResults}/>
+      <SearchBar setResults={setResults} filters={filters} />
+      <Filters value={filters} onChange={setFilters} />
 
       {/* NEW: toolbar */}
       <div className="toolbar" style={{ display: "flex", gap: 8, margin: "12px 0" }}>
