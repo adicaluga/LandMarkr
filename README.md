@@ -145,6 +145,16 @@ Note:
 
 ## ▶️ Running the Project Locally
 
+Run everything from the repo root (workspace):
+1. Install dependencies
+2. Start both apps
+
+Commands:
+pnpm install
+pnpm dev
+
+---
+
 Backend setup:
 1. Navigate to the server directory
 2. Install dependencies
